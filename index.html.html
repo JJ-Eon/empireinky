@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Empire Ink – Offline Writing Blog with File Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #fdfaf6;
+    --text: #2c2c2c;
+    --accent: #7a4e21;
+    --highlight: #d4af7f;
+    --sidebar-bg: #eae4d9;
+    --sidebar-text: #7a4e21;
+    --sidebar-hover: #c5b193;
+    --active-bg: #7a4e21;
+    --active-text: #fdfaf6;
+  }
+  [data-theme="dark"] {
+    --bg: #1e1e1e;
+    --text: #f5f5f5;
+    --accent: #c69058;
+    --highlight: #444;
+    --sidebar-bg: #2a2a2a;
+    --sidebar-text: #c69058;
+    --sidebar-hover: #5a4a20;
+    --active-bg: #c69058;
+    --active-text: #1e1e1e;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  #sidebar {
+    width: 280px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--highlight);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  #sidebar header {
+    padding: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--highlight);
+    text-align: center;
+    background-color: var(--accent);
+    color: var(--active-text);
+    user-select: none;
+  }
+
+  #fileList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+  }
+
+  .file-item {
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  .file-item:hover {
+    background-color: var(--sidebar-hover);
+  }
+
+  .file-item.active {
+    background-color: var(--active-bg);
+    color: var(--active-text);
+    border-left-color: var(--active-text);
+    font-weight: 600;
+  }
+
+  .file-item button.delete-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.3rem;
+    user-select: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .file-item button.delete-btn:hover {
+    opacity: 1;
+  }
+
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg);
+  }
+
+  #titleInput {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-bottom: 2px solid var(--accent);
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+    outline-offset: 2px;
+  }
+  #titleInput::placeholder {
+    color: #aaa;
+  }
+
+  #editor {
+    flex: 1;
+    font-family: 'Georgia', serif;
+    font-size: 1.15rem;
+    padding: 1.5rem;
+    border: none;
+    outline: none;
+    resize: none;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.5;
+    overflow-y: auto;
+  }
+
+  #toolbar {
+    padding: 0.8rem 1rem;
+    background-color: var(--highlight);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+
+  #toolbar button {
+    background-color: var(--accent);
+    color: var(--active-text);
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    user-select: none;
+  }
+  #toolbar button:hover {
+    background-color: #5c3b1c;
+  }
+
+  #statusBar {
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    color: #555;
+    background-color: var(--highlight);
+    text-align: right;
+    user-select: none;
+  }
+
+  #newFileBtn {
+    margin: 1rem;
+    background-color: var(--accent);
+    color: var(--active-text);
+    border: none;
+    padding: 0.7rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+  }
+  #newFileBtn:hover {
+    background-color: #5c3b1c;
+  }
+
+  @media (max-width: 700px) {
+    #sidebar {
+      width: 200px;
+    }
+    #titleInput {
+      font-size: 1.4rem;
+    }
+    #toolbar button {
+      font-size: 0.9rem;
+      padding: 0.5rem 0.8rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <nav id="sidebar" aria-label="File directory">
+    <header>Empire Ink Files</header>
+    <div id="fileList" role="list"></div>
+    <button id="newFileBtn" aria-label="Create new document" title="New Document">+ New Document</button>
+  </nav>
+
+  <main id="main">
+    <input type="text" id="titleInput" placeholder="Untitled Document" aria-label="Document title" autocomplete="off" />
+    <textarea id="editor" placeholder="Start writing your story here..." aria-label="Writing area" spellcheck="true"></textarea>
+
+    <div id="toolbar" role="toolbar" aria-label="Editor actions">
+      <button id="saveBtn" title="Save document">💾 Save</button>
+      <button id="downloadBtn" title="Download as .txt">⬇️ Download</button>
+      <button id="clearBtn" title="Clear editor">🧹 Clear</button>
+      <button id="toggleThemeBtn" title="Toggle dark/light theme">🌓 Theme</button>
+    </div>
+
+    <div id="statusBar" aria-live="polite" aria-atomic="true">Ready</div>
+  </main>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'empire_ink_docs';
+  const THEME_KEY = 'empire_ink_theme';
+
+  const fileList = document.getElementById('fileList');
+  const newFileBtn = document.getElementById('newFileBtn');
+  const titleInput = document.getElementById('titleInput');
+  const editor = document.getElementById('editor');
+  const saveBtn = document.getElementById('saveBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const toggleThemeBtn = document.getElementById('toggleThemeBtn');
+  const statusBar = document.getElementById('statusBar');
+
+  let documents = {};
+  let currentTitle = null;
+  let saveTimeout;
+
+  function sanitizeTitle(title) {
+    return title.trim().replace(/[\\/:*?"<>|]+/g, '').substring(0, 50);
+  }
+
+  function updateStatus(message) {
+    statusBar.textContent = message;
+  }
+
+  function saveDocumentsToStorage() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
+  }
+
+  function loadDocumentsFromStorage() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    documents = stored ? JSON.parse(stored) : {};
+  }
+
+  function renderFileList() {
+    fileList.innerHTML = '';
+    if (Object.keys(documents).length === 0) {
+      const emptyMsg = document.createElement('div');
+      emptyMsg.style.padding = '1rem';
+      emptyMsg.style.color = '#999';
+      emptyMsg.textContent = 'No documents yet. Click "+ New Document" to start.';
+      fileList.appendChild(emptyMsg);
+      return;
+    }
+    Object.entries(documents).forEach(([title]) => {
+      const item = document.createElement('div');
+      item.classList.add('file-item');
+      if (title === currentTitle) item.classList.add('active');
+      item.setAttribute('role', 'listitem');
+      item.setAttribute('tabindex', '0');
+      item.textContent = title;
+
+      const delBtn = document.createElement('button');
+      delBtn.classList.add('delete-btn');
+      delBtn.setAttribute('aria-label', `Delete document ${title}`);
+      delBtn.title = `Delete "${title}"`;
+      delBtn.innerHTML = '✖';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete document "${title}"? This action cannot be undone.`)) {
+          delete documents[title];
+          if (title === currentTitle) {
+            currentTitle = null;
+            titleInput.value = '';
+            editor.value = '';
+            updateStatus('Deleted current document. Create or load a new one.');
+          }
+          saveDocumentsToStorage();
+          renderFileList();
+        }
+      });
+
+      item.appendChild(delBtn);
+
+      item.addEventListener('click', () => {
+        if (currentTitle !== title) loadDocument(title);
+      });
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (currentTitle !== title) loadDocument(title);
+        }
+      });
+
+      fileList.appendChild(item);
+    });
+  }
+
+  function loadDocument(title) {
+    if (!documents[title]) return;
+    currentTitle = title;
+    titleInput.value = title;
+    editor.value = documents[title];
+    updateStatus(`Loaded "${title}"`);
+    renderFileList();
+    updateWordCount();
+    editor.focus();
+  }
+
+  function saveCurrentDocument() {
+    let title = sanitizeTitle(titleInput.value);
+    if (!title) {
+      title = editor.value.trim().split(/\s+/).slice(0, 4).join(' ');
+      if (!title) {
+        updateStatus('Cannot save empty document without a title.');
+        return false;
+      }
+    }
+    if (currentTitle && currentTitle !== title) {
+      if (documents[title]) {
+        updateStatus(`Title "${title}" already exists. Choose another.`);
+        return false;
+      }
+      delete documents[currentTitle];
+      currentTitle = title;
+    } else if (!currentTitle) {
+      currentTitle = title;
+    }
+    documents[currentTitle] = editor.value;
+    saveDocumentsToStorage();
+    renderFileList();
+    updateStatus(`Saved "${currentTitle}"`);
+    return true;
+  }
+
+  function newDocument() {
+    if (editor.value.trim() !== '' || titleInput.value.trim() !== '') {
+      const proceed = confirm('Current document is not empty. Save before creating new?');
+      if (proceed) {
+        if (!saveCurrentDocument()) return;
+      }
+    }
+    currentTitle = null;
+    titleInput.value = '';
+    editor.value = '';
+    updateStatus('New blank document ready.');
+    renderFileList();
+    updateWordCount();
+    editor.focus();
+  }
+
+  function clearEditor() {
+    if (confirm('Clear editor? This will not delete any saved documents.')) {
+      editor.value = '';
+      titleInput.value = '';
+      updateStatus('Editor cleared.');
+      updateWordCount();
+      currentTitle = null;
+      renderFileList();
+      editor.focus();
+    }
+  }
+
+  function downloadDocument() {
+    let filename = sanitizeTitle(titleInput.value) || 'untitled';
+    if (!editor.value) {
+      updateStatus('Nothing to download (empty document).');
+      return;
+    }
+    const blob = new Blob([editor.value], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    updateStatus(`Downloaded "${filename}.txt"`);
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+  }
+
+  editor.addEventListener('input', () => {
+    updateWordCount();
+    updateStatus('Unsaved changes...');
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      updateStatus('Ready (click Save to store changes)');
+    }, 1500);
+  });
+  titleInput.addEventListener('input', () => {
+    updateStatus('Unsaved changes...');
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      updateStatus('Ready (click Save to store changes)');
+    }, 1500);
+  });
+
+  function updateWordCount() {
+    const text = editor.value.trim();
+    const words = text.length ? text.split(/\s+/).length : 0;
+    statusBar.textContent = `Words: ${words} | Characters: ${text.length}`;
+  }
+
+  function loadTheme() {
+    const theme = localStorage.getItem(THEME_KEY);
+    if (theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }
+
+  function init() {
+    loadTheme();
+    loadDocumentsFromStorage();
+    renderFileList();
+    updateWordCount();
+    updateStatus('Ready. Create or load a document.');
+    const keys = Object.keys(documents);
+    if (keys.length) loadDocument(keys[0]);
+  }
+
+  saveBtn.addEventListener('click', saveCurrentDocument);
+  downloadBtn.addEventListener('click', downloadDocument);
+  clearBtn.addEventListener('click', clearEditor);
+  toggleThemeBtn.addEventListener('click', toggleTheme);
+  newFileBtn.addEventListener('click', newDocument);
+
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      saveCurrentDocument();
+    }
+  });
+
+  init();
+})();
+</script>
+
+</body>
+</html>
