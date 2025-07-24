@@ -1,67 +1,59 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF‑8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Empire Ink – Refined Writing App</title>
+<title>Empire Ink – Final Writing App</title>
 <style>
   :root {
-    --bg:#fdfaf6; --text:#2c2c2c; --accent:#7a4e21;
-    --sidebar-bg:#eae4d9; --toolbar-bg:#f0eadf; --btn:#7a4e21; --btn-text:#fff;
-    --focus:#ffcc00;
+    --bg:#fdfaf6;--text:#2c2c2c;--accent:#7a4e21;
+    --sidebar-bg:#eae4d9;--toolbar-bg:#f0eadf;--btn:#7a4e21;--btn-text:#fff;
+    --focus: #ffcc00;
   }
   [data-theme="dark"] {
-    --bg:#1e1e1e; --text:#f5f5f5; --accent:#c69058;
-    --sidebar-bg:#2a2a2a; --toolbar-bg:#333; --btn:#c69058; --btn-text:#1e1e1e;
+    --bg:#1e1e1e;--text:#f5f5f5;--accent:#c69058;
+    --sidebar-bg:#2a2a2a;--toolbar-bg:#333;--btn:#c69058;--btn-text:#1e1e1e;
   }
-  *{box-sizing:border-box;}
+  *,*::before,*::after{box-sizing:border-box;}
   body{margin:0;height:100vh;display:flex;flex-direction:column;
-       font-family:sans-serif;background:var(--bg);color:var(--text);}
-  header{background:var(--toolbar-bg);display:flex;align-items:center;padding:.7rem 1rem;}
+    font-family:sans-serif;background:var(--bg);color:var(--text);}
+  header{background:var(--toolbar-bg);display:flex;align-items:center;
+    padding:.7rem 1rem;}
   #menuBtn{font-size:1.5rem;background:none;border:none;color:var(--text);cursor:pointer;}
   #titleInput{margin-left:1rem;flex:1;font-size:1.2rem;background:transparent;
-              border:none;color:var(--text);outline:none;}
+    border:none;color:var(--text);outline:none;}
   #titleInput:focus{outline:2px solid var(--focus);}
   #container{flex:1;display:flex;width:100%;height:calc(100vh - 56px);}
   #sidebar{width:260px;background:var(--sidebar-bg);padding:1rem;
-           position:absolute;left:-260px;top:56px;bottom:0;overflow-y:auto;
-           transition:left .3s;z-index:10;}
+    position:absolute;left:-260px;top:56px;bottom:0;overflow-y:auto;transition:left .3s;z-index:10;}
   #sidebar.open{left:0;}
   .section-title{margin:1rem 0 .5rem;font-weight:bold;cursor:pointer;
-                 display:flex;justify-content:space-between;align-items:center;}
+    display:flex;justify-content:space-between;align-items:center;}
   .submenu{overflow:hidden;transition:max-height .3s ease;}
   .collapsed{max-height:0;}
   .expanded{max-height:400px;}
   #fileFilter{width:100%;padding:.3rem;margin-bottom:.5rem;border:1px solid #ccc;}
   .file-item{padding:.5rem;cursor:pointer;border-bottom:1px solid #ccc;}
-  .file-item:hover{background:var(--toolbar-bg);}
+  .file-item:focus,.file-item:hover{background:var(--toolbar-bg);outline:none;}
   .file-item:focus{outline:2px solid var(--focus);}
   .btn{display:block;width:100%;text-align:left;padding:.5rem .8rem;
-       background:var(--btn);color:var(--btn-text);border:none;cursor:pointer;
-       margin:.3rem 0;font-size:1rem;}
+    background:var(--btn);color:var(--btn-text);border:none;cursor:pointer;
+    margin:.3rem 0;font-size:1rem;}
   .btn:hover{opacity:.9;}
-  textarea, #preview {
-    flex:1;padding:1.5rem;font-size:1rem;line-height:1.5;
-    border:none;outline:none;background:var(--bg);color:var(--text);
-    font-family:Georgia, serif;resize:none;overflow-y:auto;
-    white-space: pre-wrap; /* preserves line breaks */
-    word-wrap: break-word; /* forces long words to wrap */
-  }
-  textarea {
-    border-left:1px solid var(--accent);
-    border-top:1px solid var(--accent);
-    box-sizing:border-box;
-  }
+  #editor,#preview{flex:1;padding:1.5rem;font-size:1rem;line-height:1.5;
+    border:none;outline:none;background:var(--bg);color:var(--text);resize:none;overflow-y:auto;}
   #toolbar{background:var(--toolbar-bg);padding:.5rem 1rem;display:flex;
-            gap:1rem;align-items:center;flex-wrap:wrap;}
+    gap:1rem;align-items:center;flex-wrap:wrap;}
   #toolbar label{display:flex;gap:.3rem;font-size:1rem;}
   #status{background:var(--toolbar-bg);padding:.5rem 1rem;font-size:.85rem;text-align:right;}
   #goalInput{width:100%;padding:.4rem;border:1px solid #ccc;margin-bottom:.5rem;}
   .progress,.stats{font-size:.85rem;margin-bottom:.5rem;}
-  @media(max-width:600px){#sidebar{width:100%;}}
+  @media(max-width:600px){#sidebar{width:100%}}
 </style>
 </head>
 <body>
+
 <header>
   <button id="menuBtn" title="Toggle menu">☰</button>
   <input id="titleInput" placeholder="Untitled Document" autocomplete="off"/>
@@ -81,6 +73,7 @@
       <button class="btn" id="clearBtn">🧹 Clear editor</button>
       <button class="btn" id="downloadBtn">⬇ Download</button>
     </div>
+
     <div class="section-title" id="toggleSettings">
       <span>⚙️ Settings</span><span id="settingsArrow">▼</span>
     </div>
@@ -91,9 +84,11 @@
       <button class="btn" id="importBtn">📥 Import JSON</button>
       <input type="file" id="importInput" accept=".json" style="display:none"/>
     </div>
+
     <div class="section-title">🎯 Writing Goal</div>
     <input type="number" id="goalInput" placeholder="Set word goal"/>
     <div class="progress" id="goalStatus">Goal: –</div>
+
     <div class="section-title">📊 Word Frequency</div>
     <div class="stats" id="freqStats">–</div>
   </div>
@@ -109,246 +104,112 @@
 
 <script>
 (() => {
-  const LOCAL_KEY = 'empire_docs', THEME_KEY = 'empire_theme';
-  let docs = {}, current = null, previewOn = false, autoSaveTimer;
-  let filesVisible = true, settingsVisible = true;
-  const $ = id => document.getElementById(id);
+  const SK='empire_docs', TK='empire_theme';
+  let docs={}, current=null, previewOn=false;
+  let fil=true, setg=true, autosave=null;
+
+  const $=id=>document.getElementById(id);
   const E = {
-    fileList: $('fileList'), fileFilter: $('fileFilter'),
-    editor: $('editor'), preview: $('preview'),
-    title: $('titleInput'), status: $('status'),
-    wordCount: $('wordCount'), goal: $('goalInput'),
-    goalStatus: $('goalStatus'), freq: $('freqStats'),
-    menuBtn: $('menuBtn'), sidebar: $('sidebar'),
-    toggleFiles: $('toggleFiles'), filesArrow: $('filesArrow'),
-    fileSection: $('fileSection'), toggleSettings: $('toggleSettings'),
-    settingsArrow: $('settingsArrow'), settingsSection: $('settingsSection'),
-    newBtn: $('newBtn'), saveBtn: $('saveBtn'),
-    deleteBtn: $('deleteBtn'), clearBtn: $('clearBtn'),
-    downloadBtn: $('downloadBtn'), themeBtn: $('themeBtn'),
-    mdBtn: $('mdBtn'), exportBtn: $('exportBtn'), importBtn: $('importBtn'),
-    importInput: $('importInput')
+    fileList:$('fileList'), fileFilter:$('fileFilter'),
+    editor:$('editor'), preview:$('preview'),
+    title:$('titleInput'), status:$('status'),
+    wordCount:$('wordCount'), goal:$('goalInput'),
+    goalStatus:$('goalStatus'), freq:$('freqStats'),
+    menu:$('menuBtn'), sidebar:$('sidebar'),
+    toggleFiles:$('toggleFiles'), filesArrow:$('filesArrow'),
+    fileSec:$('fileSection'), toggleSettings:$('toggleSettings'),
+    settingsArrow:$('settingsArrow'), setSec:$('settingsSection'),
+    newBtn:$('newBtn'), saveBtn:$('saveBtn'),
+    deleteBtn:$('deleteBtn'), clearBtn:$('clearBtn'),
+    downloadBtn:$('downloadBtn'), themeBtn:$('themeBtn'),
+    mdBtn:$('mdBtn'), exportBtn:$('exportBtn'), importBtn:$('importBtn'),
+    importInput:$('importInput')
   };
 
-  function showStatus(msg) {
-    E.status.textContent = msg;
-    setTimeout(() => E.status.textContent = 'Ready', 2000);
+  function alertStatus(m){E.status.textContent=m; setTimeout(()=>E.status.textContent='Ready',2000);}
+  function wc(){const t=E.editor.value.trim(), w=t? t.split(/\s+/).length:0;
+    E.wordCount.textContent=`Words: ${w} | Chars: ${t.length}`;
+    updateGoal(w); updateFreq(t);
   }
-
-  function updateCounts() {
-    const txt = E.editor.value.trim();
-    const words = txt ? txt.split(/\s+/).length : 0;
-    E.wordCount.textContent = `Words: ${words} | Chars: ${txt.length}`;
-    updateGoal(words);
-    updateFreq(txt);
+  function updateGoal(w){const g=parseInt(E.goal.value);
+    E.goalStatus.textContent = g>0? `Goal: ${w}/${g} (${Math.min(100,Math.floor(w/g*100))}%)` : 'Goal: –';
   }
-
-  function updateGoal(words) {
-    const goal = parseInt(E.goal.value);
-    E.goalStatus.textContent = goal > 0
-      ? `Goal: ${words}/${goal} words (${Math.min(100, Math.floor(words/goal*100))}%)`
-      : 'Goal: –';
+  function updateFreq(txt){if(!txt){E.freq.textContent='–';return;}
+    let f={}; txt.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/).filter(w=>w.length>3)
+      .forEach(w=>f[w]=(f[w]||0)+1);
+    E.freq.textContent=Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(p=>`${p[0]}:${p[1]}`).join(', ');
   }
-
-  function updateFreq(txt) {
-    if (!txt) {
-      E.freq.textContent = '–';
-      return;
-    }
-    const freq = {};
-    txt.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 3)
-       .forEach(w => freq[w] = (freq[w] || 0) + 1);
-    const top = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0,5);
-    E.freq.textContent = top.map(p => `${p[0]}:${p[1]}`).join(', ');
+  function persist(){localStorage.setItem(SK, JSON.stringify(docs));}
+  function loadTheme(){const t=localStorage.getItem(TK); if(t) document.documentElement.setAttribute('data-theme',t);}
+  function renderFiles(){
+    E.fileList.innerHTML=''; if(!fil) return;
+    const q=E.fileFilter.value.toLowerCase();
+    Object.keys(docs).filter(n=>n.toLowerCase().includes(q)).forEach(n=>{
+      let d=document.createElement('div'); d.textContent=n; d.tabIndex=0;
+      d.className='file-item'; d.onclick=()=>loadDoc(n); d.onkeydown=e=>{if(e.key==='Enter') loadDoc(n);}
+      E.fileList.appendChild(d);
+    });
   }
-
-  function persist() {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(docs));
+  function loadDoc(n){current=n; E.title.value=n; E.editor.value=docs[n]; wc(); alertStatus(`Loaded "${n}"`);
+    if(previewOn) togglePreview();
   }
-
-  function loadTheme() {
-    const t = localStorage.getItem(THEME_KEY);
-    if (t) document.documentElement.setAttribute('data-theme', t);
+  function saveDoc(){const t=(E.title.value||'Untitled').trim(); if(!t)return;
+    docs[t]=E.editor.value; current=t; persist(); renderFiles(); alertStatus('Saved');
   }
-
-  function renderFiles() {
-    E.fileList.innerHTML = '';
-    if (!filesVisible) return;
-    const filter = E.fileFilter.value.toLowerCase();
-    Object.keys(docs).filter(n => n.toLowerCase().includes(filter))
-      .forEach(n => {
-        const d = document.createElement('div');
-        d.textContent = n;
-        d.tabIndex = 0;
-        d.className = 'file-item';
-        d.onclick = () => loadDocument(n);
-        d.onkeydown = e => { if (e.key === 'Enter') loadDocument(n); };
-        E.fileList.appendChild(d);
-      });
+  function deleteDoc(){if(!current) return alertStatus('No doc selected');
+    if(confirm(`Delete "${current}"?`)){delete docs[current]; persist();current=null;
+      E.editor.value='';E.title.value='';renderFiles();wc();alertStatus('Deleted');}
   }
-
-  function loadDocument(name) {
-    current = name;
-    E.title.value = name;
-    E.editor.value = docs[name];
-    updateCounts();
-    showStatus(`Loaded "${name}"`);
-    if (previewOn) togglePreview();
+  function newDoc(){if(E.editor.value.trim()) saveDoc(); current=null;E.editor.value='';E.title.value='';wc();alertStatus('New doc');}
+  function clearEditor(){if(confirm('Clear content?')){E.editor.value='';wc();alertStatus('Cleared');}}
+  function downloadDoc(){const t=(E.title.value||'Untitled').trim();
+    let b=new Blob([E.editor.value],{type:'text/plain'});let a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download=`${t}.txt`;a.click(); alertStatus('Downloaded');}
+  function toggleTheme(){const c=document.documentElement.getAttribute('data-theme'),
+    n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem(TK,n);}
+  function togglePreview(){previewOn=!previewOn;
+    if(previewOn){E.preview.innerHTML=marked(E.editor.value); E.preview.classList.remove('hidden');
+      E.editor.classList.add('hidden');E.mdBtn.textContent='✏️ Edit';
+    } else{E.preview.classList.add('hidden');E.editor.classList.remove('hidden');E.mdBtn.textContent='📝 Markdown Preview';}
   }
-
-  function saveDocument() {
-    const title = (E.title.value || 'Untitled').trim();
-    if (!title) return;
-    docs[title] = E.editor.value;
-    current = title;
-    persist();
-    renderFiles();
-    showStatus('Saved');
+  function exportAll(){let b=new Blob([JSON.stringify(docs)],{type:'application/json'});
+    let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='empire_docs_backup.json';a.click();alertStatus('Exported');}
+  function importAll(f){let r=new FileReader();r.onload=e=>{
+      try{let o=JSON.parse(e.target.result);if(typeof o==='object'){docs=o;persist();renderFiles();alertStatus('Imported');}else throw '';
+      }catch{alertStatus('Import failed');}}; r.readAsText(f);
   }
-
-  function deleteDocument() {
-    if (!current) return showStatus('No document selected');
-    if (confirm(`Delete "${current}"?`)) {
-      delete docs[current];
-      current = null;
-      E.title.value = E.editor.value = '';
-      persist();
-      renderFiles();
-      updateCounts();
-      showStatus('Deleted');
-    }
-  }
-
-  function newDocument() {
-    if (E.editor.value.trim()) saveDocument();
-    current = null;
-    E.title.value = E.editor.value = '';
-    updateCounts();
-    showStatus('New document');
-  }
-
-  function clearEditor() {
-    if (confirm('Clear content?')) {
-      E.editor.value = '';
-      updateCounts();
-      showStatus('Cleared');
-    }
-  }
-
-  function downloadDocument() {
-    const title = (E.title.value || 'Untitled').trim();
-    const blob = new Blob([E.editor.value], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${title}.txt`;
-    a.click();
-    showStatus('Downloaded');
-  }
-
-  function toggleTheme() {
-    const cur = document.documentElement.getAttribute('data-theme');
-    const nxt = cur === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', nxt);
-    localStorage.setItem(THEME_KEY, nxt);
-  }
-
-  function togglePreview() {
-    previewOn = !previewOn;
-    if (previewOn) {
-      E.preview.innerHTML = marked(E.editor.value);
-      E.preview.classList.remove('hidden');
-      E.editor.classList.add('hidden');
-      E.mdBtn.textContent = '✏️ Edit';
-    } else {
-      E.preview.classList.add('hidden');
-      E.editor.classList.remove('hidden');
-      E.mdBtn.textContent = '📝 Markdown Preview';
-    }
-  }
-
-  function exportAll() {
-    const blob = new Blob([JSON.stringify(docs)], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'empire_docs_backup.json';
-    a.click();
-    showStatus('Exported');
-  }
-
-  function importAll(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const obj = JSON.parse(e.target.result);
-        if (typeof obj === 'object') {
-          docs = obj;
-          persist();
-          renderFiles();
-          showStatus('Imported');
-        } else throw '';
-      } catch {
-        showStatus('Import failed');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  loadTheme();
-  docs = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {};
-  renderFiles();
-  if (Object.keys(docs)[0]) loadDocument(Object.keys(docs)[0]);
-  updateCounts();
-
-  E.fileFilter.oninput = renderFiles;
-  E.toggleFiles.onclick = () => {
-    filesVisible = !filesVisible;
-    E.filesArrow.textContent = filesVisible ? '▼' : '▲';
-    renderFiles();
+  loadTheme(); docs=JSON.parse(localStorage.getItem(SK))||{}; renderFiles(); if(Object.keys(docs)[0]) loadDoc(Object.keys(docs)[0]); wc();
+  E.fileFilter.oninput=renderFiles;
+  E.toggleFiles.onclick=()=>{fil=!fil;E.filesArrow.textContent=fil?'▼':'▲';renderFiles();}
+  E.toggleSettings.onclick=()=>{setg=!setg;E.settingsArrow.textContent=setg?'▼':'▲';
+    E.setSec.classList.toggle('collapsed');}
+  E.saveBtn.onclick=saveDoc;E.newBtn.onclick=newDoc;E.deleteBtn.onclick=deleteDoc;
+  E.clearBtn.onclick=clearEditor;E.downloadBtn.onclick=downloadDoc;
+  E.themeBtn.onclick=toggleTheme;E.mdBtn.onclick=togglePreview;
+  E.exportBtn.onclick=exportAll;E.importBtn.onclick=()=>E.importInput.click();
+  E.importInput.onchange=e=>importAll(e.target.files[0]);
+  E.menu.onclick=()=>E.sidebar.classList.toggle('open');
+  E.editor.oninput=()=>{
+    wc(); alertStatus('Unsaved...'); clearTimeout(autosave); autosave=setTimeout(saveDoc,5000);
   };
-  E.toggleSettings.onclick = () => {
-    settingsVisible = !settingsVisible;
-    E.settingsArrow.textContent = settingsVisible ? '▼' : '▲';
-    E.settingsSection.classList.toggle('collapsed');
-  };
-
-  E.saveBtn.onclick = saveDocument;
-  E.newBtn.onclick = newDocument;
-  E.deleteBtn.onclick = deleteDocument;
-  E.clearBtn.onclick = clearEditor;
-  E.downloadBtn.onclick = downloadDocument;
-  E.themeBtn.onclick = toggleTheme;
-  E.mdBtn.onclick = togglePreview;
-  E.exportBtn.onclick = exportAll;
-  E.importBtn.onclick = () => E.importInput.click();
-  E.importInput.onchange = e => importAll(e.target.files[0]);
-  E.menuBtn.onclick = () => E.sidebar.classList.toggle('open');
-
-  E.editor.oninput = () => {
-    updateCounts();
-    showStatus('Unsaved changes...');
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(saveDocument, 5000);
-  };
-  E.title.oninput = () => showStatus('Unsaved changes...');
-
-  document.addEventListener('keydown', e => {
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key.toLowerCase()) {
-        case 's': e.preventDefault(); saveDocument(); break;
-        case 'n': e.preventDefault(); newDocument(); break;
+  E.title.oninput=()=>alertStatus('Unsaved...');
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)){
+      switch(e.key.toLowerCase()){
+        case 's': e.preventDefault(); saveDoc(); break;
+        case 'n': e.preventDefault(); newDoc(); break;
         case 'e': e.preventDefault(); exportAll(); break;
         case 'i': e.preventDefault(); E.importInput.click(); break;
         case 'm': e.preventDefault(); togglePreview(); break;
       }
     }
   });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
-    document.body.appendChild(s);
+  document.addEventListener('DOMContentLoaded',()=>{
+    const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/marked/marked.min.js'; document.body.appendChild(s);
   });
 })();
 </script>
+
 </body>
 </html>
