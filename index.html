@@ -1,475 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Empire Ink – Offline Writing Blog with File Directory</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Open+Sans&display=swap" rel="stylesheet" />
+<meta charset="UTF‑8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Empire Ink – Refined Writing App</title>
 <style>
   :root {
-    --bg: #fdfaf6;
-    --text: #2c2c2c;
-    --accent: #7a4e21;
-    --highlight: #d4af7f;
-    --sidebar-bg: #eae4d9;
-    --sidebar-text: #7a4e21;
-    --sidebar-hover: #c5b193;
-    --active-bg: #7a4e21;
-    --active-text: #fdfaf6;
+    --bg:#fdfaf6; --text:#2c2c2c; --accent:#7a4e21;
+    --sidebar-bg:#eae4d9; --toolbar-bg:#f0eadf; --btn:#7a4e21; --btn-text:#fff;
+    --focus:#ffcc00;
   }
   [data-theme="dark"] {
-    --bg: #1e1e1e;
-    --text: #f5f5f5;
-    --accent: #c69058;
-    --highlight: #444;
-    --sidebar-bg: #2a2a2a;
-    --sidebar-text: #c69058;
-    --sidebar-hover: #5a4a20;
-    --active-bg: #c69058;
-    --active-text: #1e1e1e;
+    --bg:#1e1e1e; --text:#f5f5f5; --accent:#c69058;
+    --sidebar-bg:#2a2a2a; --toolbar-bg:#333; --btn:#c69058; --btn-text:#1e1e1e;
   }
-
-  * {
-    box-sizing: border-box;
+  *{box-sizing:border-box;}
+  body{margin:0;height:100vh;display:flex;flex-direction:column;
+       font-family:sans-serif;background:var(--bg);color:var(--text);}
+  header{background:var(--toolbar-bg);display:flex;align-items:center;padding:.7rem 1rem;}
+  #menuBtn{font-size:1.5rem;background:none;border:none;color:var(--text);cursor:pointer;}
+  #titleInput{margin-left:1rem;flex:1;font-size:1.2rem;background:transparent;
+              border:none;color:var(--text);outline:none;}
+  #titleInput:focus{outline:2px solid var(--focus);}
+  #container{flex:1;display:flex;width:100%;height:calc(100vh - 56px);}
+  #sidebar{width:260px;background:var(--sidebar-bg);padding:1rem;
+           position:absolute;left:-260px;top:56px;bottom:0;overflow-y:auto;
+           transition:left .3s;z-index:10;}
+  #sidebar.open{left:0;}
+  .section-title{margin:1rem 0 .5rem;font-weight:bold;cursor:pointer;
+                 display:flex;justify-content:space-between;align-items:center;}
+  .submenu{overflow:hidden;transition:max-height .3s ease;}
+  .collapsed{max-height:0;}
+  .expanded{max-height:400px;}
+  #fileFilter{width:100%;padding:.3rem;margin-bottom:.5rem;border:1px solid #ccc;}
+  .file-item{padding:.5rem;cursor:pointer;border-bottom:1px solid #ccc;}
+  .file-item:hover{background:var(--toolbar-bg);}
+  .file-item:focus{outline:2px solid var(--focus);}
+  .btn{display:block;width:100%;text-align:left;padding:.5rem .8rem;
+       background:var(--btn);color:var(--btn-text);border:none;cursor:pointer;
+       margin:.3rem 0;font-size:1rem;}
+  .btn:hover{opacity:.9;}
+  textarea, #preview {
+    flex:1;padding:1.5rem;font-size:1rem;line-height:1.5;
+    border:none;outline:none;background:var(--bg);color:var(--text);
+    font-family:Georgia, serif;resize:none;overflow-y:auto;
+    white-space: pre-wrap; /* preserves line breaks */
+    word-wrap: break-word; /* forces long words to wrap */
   }
-
-  body {
-    margin: 0;
-    font-family: 'Open Sans', sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+  textarea {
+    border-left:1px solid var(--accent);
+    border-top:1px solid var(--accent);
+    box-sizing:border-box;
   }
-
-  #sidebar {
-    width: 280px;
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--highlight);
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  #sidebar header {
-    padding: 1rem;
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    border-bottom: 1px solid var(--highlight);
-    text-align: center;
-    background-color: var(--accent);
-    color: var(--active-text);
-    user-select: none;
-  }
-
-  #fileList {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem 0;
-  }
-
-  .file-item {
-    padding: 0.7rem 1rem;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 4px solid transparent;
-    transition: background-color 0.2s, border-color 0.2s;
-  }
-
-  .file-item:hover {
-    background-color: var(--sidebar-hover);
-  }
-
-  .file-item.active {
-    background-color: var(--active-bg);
-    color: var(--active-text);
-    border-left-color: var(--active-text);
-    font-weight: 600;
-  }
-
-  .file-item button.delete-btn {
-    background: transparent;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0 0.3rem;
-    user-select: none;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-  }
-
-  .file-item button.delete-btn:hover {
-    opacity: 1;
-  }
-
-  #main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--bg);
-  }
-
-  #titleInput {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    padding: 0.7rem 1rem;
-    border: none;
-    border-bottom: 2px solid var(--accent);
-    width: 100%;
-    box-sizing: border-box;
-    background-color: var(--bg);
-    color: var(--text);
-    transition: background-color 0.3s, color 0.3s;
-    outline-offset: 2px;
-  }
-  #titleInput::placeholder {
-    color: #aaa;
-  }
-
-  #editor {
-    flex: 1;
-    font-family: 'Georgia', serif;
-    font-size: 1.15rem;
-    padding: 1.5rem;
-    border: none;
-    outline: none;
-    resize: none;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: var(--bg);
-    color: var(--text);
-    transition: background-color 0.3s, color 0.3s;
-    line-height: 1.5;
-    overflow-y: auto;
-  }
-
-  #toolbar {
-    padding: 0.8rem 1rem;
-    background-color: var(--highlight);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-start;
-  }
-
-  #toolbar button {
-    background-color: var(--accent);
-    color: var(--active-text);
-    border: none;
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    user-select: none;
-  }
-  #toolbar button:hover {
-    background-color: #5c3b1c;
-  }
-
-  #statusBar {
-    padding: 0.4rem 1rem;
-    font-size: 0.9rem;
-    color: #555;
-    background-color: var(--highlight);
-    text-align: right;
-    user-select: none;
-  }
-
-  #newFileBtn {
-    margin: 1rem;
-    background-color: var(--accent);
-    color: var(--active-text);
-    border: none;
-    padding: 0.7rem;
-    font-size: 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s;
-  }
-  #newFileBtn:hover {
-    background-color: #5c3b1c;
-  }
-
-  @media (max-width: 700px) {
-    #sidebar {
-      width: 200px;
-    }
-    #titleInput {
-      font-size: 1.4rem;
-    }
-    #toolbar button {
-      font-size: 0.9rem;
-      padding: 0.5rem 0.8rem;
-    }
-  }
+  #toolbar{background:var(--toolbar-bg);padding:.5rem 1rem;display:flex;
+            gap:1rem;align-items:center;flex-wrap:wrap;}
+  #toolbar label{display:flex;gap:.3rem;font-size:1rem;}
+  #status{background:var(--toolbar-bg);padding:.5rem 1rem;font-size:.85rem;text-align:right;}
+  #goalInput{width:100%;padding:.4rem;border:1px solid #ccc;margin-bottom:.5rem;}
+  .progress,.stats{font-size:.85rem;margin-bottom:.5rem;}
+  @media(max-width:600px){#sidebar{width:100%;}}
 </style>
 </head>
 <body>
+<header>
+  <button id="menuBtn" title="Toggle menu">☰</button>
+  <input id="titleInput" placeholder="Untitled Document" autocomplete="off"/>
+</header>
 
-  <nav id="sidebar" aria-label="File directory">
-    <header>Empire Ink Files</header>
-    <div id="fileList" role="list"></div>
-    <button id="newFileBtn" aria-label="Create new document" title="New Document">+ New Document</button>
-  </nav>
-
-  <main id="main">
-    <input type="text" id="titleInput" placeholder="Untitled Document" aria-label="Document title" autocomplete="off" />
-    <textarea id="editor" placeholder="Start writing your story here..." aria-label="Writing area" spellcheck="true"></textarea>
-
-    <div id="toolbar" role="toolbar" aria-label="Editor actions">
-      <button id="saveBtn" title="Save document">💾 Save</button>
-      <button id="downloadBtn" title="Download as .txt">⬇️ Download</button>
-      <button id="clearBtn" title="Clear editor">🧹 Clear</button>
-      <button id="toggleThemeBtn" title="Toggle dark/light theme">🌓 Theme</button>
+<div id="container">
+  <div id="sidebar">
+    <div class="section-title" id="toggleFiles">
+      <span>📁 Documents</span><span id="filesArrow">▼</span>
     </div>
+    <div id="fileSection" class="submenu expanded">
+      <input id="fileFilter" placeholder="Search files…"/>
+      <div id="fileList"></div>
+      <button class="btn" id="newBtn">+ New document</button>
+      <button class="btn" id="saveBtn">💾 Save document</button>
+      <button class="btn" id="deleteBtn">🗑 Delete document</button>
+      <button class="btn" id="clearBtn">🧹 Clear editor</button>
+      <button class="btn" id="downloadBtn">⬇ Download</button>
+    </div>
+    <div class="section-title" id="toggleSettings">
+      <span>⚙️ Settings</span><span id="settingsArrow">▼</span>
+    </div>
+    <div id="settingsSection" class="submenu expanded">
+      <button class="btn" id="themeBtn">🌓 Toggle theme</button>
+      <button class="btn" id="mdBtn">📝 Markdown preview</button>
+      <button class="btn" id="exportBtn">📤 Export all</button>
+      <button class="btn" id="importBtn">📥 Import JSON</button>
+      <input type="file" id="importInput" accept=".json" style="display:none"/>
+    </div>
+    <div class="section-title">🎯 Writing Goal</div>
+    <input type="number" id="goalInput" placeholder="Set word goal"/>
+    <div class="progress" id="goalStatus">Goal: –</div>
+    <div class="section-title">📊 Word Frequency</div>
+    <div class="stats" id="freqStats">–</div>
+  </div>
 
-    <div id="statusBar" aria-live="polite" aria-atomic="true">Ready</div>
-  </main>
+  <textarea id="editor" placeholder="Start writing…"></textarea>
+  <div id="preview" class="hidden"></div>
+</div>
+
+<div id="toolbar">
+  <label><span id="wordCount">Words: 0 | Chars: 0</span></label>
+</div>
+<div id="status">Ready</div>
 
 <script>
 (() => {
-  const STORAGE_KEY = 'empire_ink_docs';
-  const THEME_KEY = 'empire_ink_theme';
+  const LOCAL_KEY = 'empire_docs', THEME_KEY = 'empire_theme';
+  let docs = {}, current = null, previewOn = false, autoSaveTimer;
+  let filesVisible = true, settingsVisible = true;
+  const $ = id => document.getElementById(id);
+  const E = {
+    fileList: $('fileList'), fileFilter: $('fileFilter'),
+    editor: $('editor'), preview: $('preview'),
+    title: $('titleInput'), status: $('status'),
+    wordCount: $('wordCount'), goal: $('goalInput'),
+    goalStatus: $('goalStatus'), freq: $('freqStats'),
+    menuBtn: $('menuBtn'), sidebar: $('sidebar'),
+    toggleFiles: $('toggleFiles'), filesArrow: $('filesArrow'),
+    fileSection: $('fileSection'), toggleSettings: $('toggleSettings'),
+    settingsArrow: $('settingsArrow'), settingsSection: $('settingsSection'),
+    newBtn: $('newBtn'), saveBtn: $('saveBtn'),
+    deleteBtn: $('deleteBtn'), clearBtn: $('clearBtn'),
+    downloadBtn: $('downloadBtn'), themeBtn: $('themeBtn'),
+    mdBtn: $('mdBtn'), exportBtn: $('exportBtn'), importBtn: $('importBtn'),
+    importInput: $('importInput')
+  };
 
-  const fileList = document.getElementById('fileList');
-  const newFileBtn = document.getElementById('newFileBtn');
-  const titleInput = document.getElementById('titleInput');
-  const editor = document.getElementById('editor');
-  const saveBtn = document.getElementById('saveBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const toggleThemeBtn = document.getElementById('toggleThemeBtn');
-  const statusBar = document.getElementById('statusBar');
-
-  let documents = {};
-  let currentTitle = null;
-  let saveTimeout;
-
-  function sanitizeTitle(title) {
-    return title.trim().replace(/[\\/:*?"<>|]+/g, '').substring(0, 50);
+  function showStatus(msg) {
+    E.status.textContent = msg;
+    setTimeout(() => E.status.textContent = 'Ready', 2000);
   }
 
-  function updateStatus(message) {
-    statusBar.textContent = message;
+  function updateCounts() {
+    const txt = E.editor.value.trim();
+    const words = txt ? txt.split(/\s+/).length : 0;
+    E.wordCount.textContent = `Words: ${words} | Chars: ${txt.length}`;
+    updateGoal(words);
+    updateFreq(txt);
   }
 
-  function saveDocumentsToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(documents));
+  function updateGoal(words) {
+    const goal = parseInt(E.goal.value);
+    E.goalStatus.textContent = goal > 0
+      ? `Goal: ${words}/${goal} words (${Math.min(100, Math.floor(words/goal*100))}%)`
+      : 'Goal: –';
   }
 
-  function loadDocumentsFromStorage() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    documents = stored ? JSON.parse(stored) : {};
-  }
-
-  function renderFileList() {
-    fileList.innerHTML = '';
-    if (Object.keys(documents).length === 0) {
-      const emptyMsg = document.createElement('div');
-      emptyMsg.style.padding = '1rem';
-      emptyMsg.style.color = '#999';
-      emptyMsg.textContent = 'No documents yet. Click "+ New Document" to start.';
-      fileList.appendChild(emptyMsg);
+  function updateFreq(txt) {
+    if (!txt) {
+      E.freq.textContent = '–';
       return;
     }
-    Object.entries(documents).forEach(([title]) => {
-      const item = document.createElement('div');
-      item.classList.add('file-item');
-      if (title === currentTitle) item.classList.add('active');
-      item.setAttribute('role', 'listitem');
-      item.setAttribute('tabindex', '0');
-      item.textContent = title;
-
-      const delBtn = document.createElement('button');
-      delBtn.classList.add('delete-btn');
-      delBtn.setAttribute('aria-label', `Delete document ${title}`);
-      delBtn.title = `Delete "${title}"`;
-      delBtn.innerHTML = '✖';
-      delBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (confirm(`Delete document "${title}"? This action cannot be undone.`)) {
-          delete documents[title];
-          if (title === currentTitle) {
-            currentTitle = null;
-            titleInput.value = '';
-            editor.value = '';
-            updateStatus('Deleted current document. Create or load a new one.');
-          }
-          saveDocumentsToStorage();
-          renderFileList();
-        }
-      });
-
-      item.appendChild(delBtn);
-
-      item.addEventListener('click', () => {
-        if (currentTitle !== title) loadDocument(title);
-      });
-      item.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (currentTitle !== title) loadDocument(title);
-        }
-      });
-
-      fileList.appendChild(item);
-    });
+    const freq = {};
+    txt.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 3)
+       .forEach(w => freq[w] = (freq[w] || 0) + 1);
+    const top = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0,5);
+    E.freq.textContent = top.map(p => `${p[0]}:${p[1]}`).join(', ');
   }
 
-  function loadDocument(title) {
-    if (!documents[title]) return;
-    currentTitle = title;
-    titleInput.value = title;
-    editor.value = documents[title];
-    updateStatus(`Loaded "${title}"`);
-    renderFileList();
-    updateWordCount();
-    editor.focus();
+  function persist() {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(docs));
   }
 
-  function saveCurrentDocument() {
-    let title = sanitizeTitle(titleInput.value);
-    if (!title) {
-      title = editor.value.trim().split(/\s+/).slice(0, 4).join(' ');
-      if (!title) {
-        updateStatus('Cannot save empty document without a title.');
-        return false;
-      }
+  function loadTheme() {
+    const t = localStorage.getItem(THEME_KEY);
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  }
+
+  function renderFiles() {
+    E.fileList.innerHTML = '';
+    if (!filesVisible) return;
+    const filter = E.fileFilter.value.toLowerCase();
+    Object.keys(docs).filter(n => n.toLowerCase().includes(filter))
+      .forEach(n => {
+        const d = document.createElement('div');
+        d.textContent = n;
+        d.tabIndex = 0;
+        d.className = 'file-item';
+        d.onclick = () => loadDocument(n);
+        d.onkeydown = e => { if (e.key === 'Enter') loadDocument(n); };
+        E.fileList.appendChild(d);
+      });
+  }
+
+  function loadDocument(name) {
+    current = name;
+    E.title.value = name;
+    E.editor.value = docs[name];
+    updateCounts();
+    showStatus(`Loaded "${name}"`);
+    if (previewOn) togglePreview();
+  }
+
+  function saveDocument() {
+    const title = (E.title.value || 'Untitled').trim();
+    if (!title) return;
+    docs[title] = E.editor.value;
+    current = title;
+    persist();
+    renderFiles();
+    showStatus('Saved');
+  }
+
+  function deleteDocument() {
+    if (!current) return showStatus('No document selected');
+    if (confirm(`Delete "${current}"?`)) {
+      delete docs[current];
+      current = null;
+      E.title.value = E.editor.value = '';
+      persist();
+      renderFiles();
+      updateCounts();
+      showStatus('Deleted');
     }
-    if (currentTitle && currentTitle !== title) {
-      if (documents[title]) {
-        updateStatus(`Title "${title}" already exists. Choose another.`);
-        return false;
-      }
-      delete documents[currentTitle];
-      currentTitle = title;
-    } else if (!currentTitle) {
-      currentTitle = title;
-    }
-    documents[currentTitle] = editor.value;
-    saveDocumentsToStorage();
-    renderFileList();
-    updateStatus(`Saved "${currentTitle}"`);
-    return true;
   }
 
   function newDocument() {
-    if (editor.value.trim() !== '' || titleInput.value.trim() !== '') {
-      const proceed = confirm('Current document is not empty. Save before creating new?');
-      if (proceed) {
-        if (!saveCurrentDocument()) return;
-      }
-    }
-    currentTitle = null;
-    titleInput.value = '';
-    editor.value = '';
-    updateStatus('New blank document ready.');
-    renderFileList();
-    updateWordCount();
-    editor.focus();
+    if (E.editor.value.trim()) saveDocument();
+    current = null;
+    E.title.value = E.editor.value = '';
+    updateCounts();
+    showStatus('New document');
   }
 
   function clearEditor() {
-    if (confirm('Clear editor? This will not delete any saved documents.')) {
-      editor.value = '';
-      titleInput.value = '';
-      updateStatus('Editor cleared.');
-      updateWordCount();
-      currentTitle = null;
-      renderFileList();
-      editor.focus();
+    if (confirm('Clear content?')) {
+      E.editor.value = '';
+      updateCounts();
+      showStatus('Cleared');
     }
   }
 
   function downloadDocument() {
-    let filename = sanitizeTitle(titleInput.value) || 'untitled';
-    if (!editor.value) {
-      updateStatus('Nothing to download (empty document).');
-      return;
-    }
-    const blob = new Blob([editor.value], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+    const title = (E.title.value || 'Untitled').trim();
+    const blob = new Blob([E.editor.value], { type: 'text/plain' });
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename + '.txt';
-    document.body.appendChild(a);
+    a.href = URL.createObjectURL(blob);
+    a.download = `${title}.txt`;
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    updateStatus(`Downloaded "${filename}.txt"`);
+    showStatus('Downloaded');
   }
 
   function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem(THEME_KEY, next);
+    const cur = document.documentElement.getAttribute('data-theme');
+    const nxt = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nxt);
+    localStorage.setItem(THEME_KEY, nxt);
   }
 
-  editor.addEventListener('input', () => {
-    updateWordCount();
-    updateStatus('Unsaved changes...');
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      updateStatus('Ready (click Save to store changes)');
-    }, 1500);
-  });
-  titleInput.addEventListener('input', () => {
-    updateStatus('Unsaved changes...');
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(() => {
-      updateStatus('Ready (click Save to store changes)');
-    }, 1500);
-  });
-
-  function updateWordCount() {
-    const text = editor.value.trim();
-    const words = text.length ? text.split(/\s+/).length : 0;
-    statusBar.textContent = `Words: ${words} | Characters: ${text.length}`;
-  }
-
-  function loadTheme() {
-    const theme = localStorage.getItem(THEME_KEY);
-    if (theme) {
-      document.documentElement.setAttribute('data-theme', theme);
+  function togglePreview() {
+    previewOn = !previewOn;
+    if (previewOn) {
+      E.preview.innerHTML = marked(E.editor.value);
+      E.preview.classList.remove('hidden');
+      E.editor.classList.add('hidden');
+      E.mdBtn.textContent = '✏️ Edit';
+    } else {
+      E.preview.classList.add('hidden');
+      E.editor.classList.remove('hidden');
+      E.mdBtn.textContent = '📝 Markdown Preview';
     }
   }
 
-  function init() {
-    loadTheme();
-    loadDocumentsFromStorage();
-    renderFileList();
-    updateWordCount();
-    updateStatus('Ready. Create or load a document.');
-    const keys = Object.keys(documents);
-    if (keys.length) loadDocument(keys[0]);
+  function exportAll() {
+    const blob = new Blob([JSON.stringify(docs)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'empire_docs_backup.json';
+    a.click();
+    showStatus('Exported');
   }
 
-  saveBtn.addEventListener('click', saveCurrentDocument);
-  downloadBtn.addEventListener('click', downloadDocument);
-  clearBtn.addEventListener('click', clearEditor);
-  toggleThemeBtn.addEventListener('click', toggleTheme);
-  newFileBtn.addEventListener('click', newDocument);
+  function importAll(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const obj = JSON.parse(e.target.result);
+        if (typeof obj === 'object') {
+          docs = obj;
+          persist();
+          renderFiles();
+          showStatus('Imported');
+        } else throw '';
+      } catch {
+        showStatus('Import failed');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  loadTheme();
+  docs = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {};
+  renderFiles();
+  if (Object.keys(docs)[0]) loadDocument(Object.keys(docs)[0]);
+  updateCounts();
+
+  E.fileFilter.oninput = renderFiles;
+  E.toggleFiles.onclick = () => {
+    filesVisible = !filesVisible;
+    E.filesArrow.textContent = filesVisible ? '▼' : '▲';
+    renderFiles();
+  };
+  E.toggleSettings.onclick = () => {
+    settingsVisible = !settingsVisible;
+    E.settingsArrow.textContent = settingsVisible ? '▼' : '▲';
+    E.settingsSection.classList.toggle('collapsed');
+  };
+
+  E.saveBtn.onclick = saveDocument;
+  E.newBtn.onclick = newDocument;
+  E.deleteBtn.onclick = deleteDocument;
+  E.clearBtn.onclick = clearEditor;
+  E.downloadBtn.onclick = downloadDocument;
+  E.themeBtn.onclick = toggleTheme;
+  E.mdBtn.onclick = togglePreview;
+  E.exportBtn.onclick = exportAll;
+  E.importBtn.onclick = () => E.importInput.click();
+  E.importInput.onchange = e => importAll(e.target.files[0]);
+  E.menuBtn.onclick = () => E.sidebar.classList.toggle('open');
+
+  E.editor.oninput = () => {
+    updateCounts();
+    showStatus('Unsaved changes...');
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveDocument, 5000);
+  };
+  E.title.oninput = () => showStatus('Unsaved changes...');
 
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-      e.preventDefault();
-      saveCurrentDocument();
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 's': e.preventDefault(); saveDocument(); break;
+        case 'n': e.preventDefault(); newDocument(); break;
+        case 'e': e.preventDefault(); exportAll(); break;
+        case 'i': e.preventDefault(); E.importInput.click(); break;
+        case 'm': e.preventDefault(); togglePreview(); break;
+      }
     }
   });
 
-  init();
+  document.addEventListener('DOMContentLoaded', () => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+    document.body.appendChild(s);
+  });
 })();
 </script>
-
 </body>
 </html>
